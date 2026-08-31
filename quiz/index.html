@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biochemistry Quiz</title>
+  <style>
+    :root {
+      font-family: Arial, sans-serif;
+      color: #1f2937;
+      background: #f3f4f6;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      color: white;
+      background: #1d4ed8;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    #timer {
+      min-width: 5.5rem;
+      font-size: 1.4rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .panel {
+      padding: 2rem;
+      text-align: center;
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px #00000018;
+    }
+
+    button {
+      padding: 0.75rem 1.25rem;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      background: #16a34a;
+      border: 0;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    #quiz-container {
+      display: none;
+      height: calc(100vh - 9rem);
+      min-height: 500px;
+      margin-top: 1rem;
+      overflow: hidden;
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px #00000018;
+    }
+
+    #quiz-file {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    #time-up {
+      display: none;
+      color: #991b1b;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Biochemistry Quiz</h1>
+    <div id="timer" aria-live="polite">02:00:00</div>
+  </header>
+
+  <main>
+    <section id="start-panel" class="panel">
+      <h2>Ready to begin?</h2>
+      <p>You will have two hours to complete the quiz.</p>
+      <button id="start-button" type="button">Start Attempt</button>
+    </section>
+
+    <section id="quiz-container" aria-label="Quiz file">
+      <iframe id="quiz-file" title="Biochemistry Quiz PDF"></iframe>
+    </section>
+
+    <section id="time-up" class="panel" role="alert">
+      Time is up. Your attempt has ended.
+    </section>
+  </main>
+
+  <script>
+    const durationInSeconds = 2 * 60 * 60;
+    let remainingSeconds = durationInSeconds;
+    let timerId;
+
+    const timer = document.getElementById('timer');
+    const startButton = document.getElementById('start-button');
+    const startPanel = document.getElementById('start-panel');
+    const quizContainer = document.getElementById('quiz-container');
+    const quizFile = document.getElementById('quiz-file');
+    const timeUpMessage = document.getElementById('time-up');
+
+    function formatTime(totalSeconds) {
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+
+      return [hours, minutes, seconds]
+        .map(value => String(value).padStart(2, '0'))
+        .join(':');
+    }
+
+    function updateTimer() {
+      timer.textContent = formatTime(remainingSeconds);
+    }
+
+    function endAttempt() {
+      clearInterval(timerId);
+      remainingSeconds = 0;
+      updateTimer();
+
+      // Remove the PDF from the page while keeping the browser window open.
+      quizFile.src = 'about:blank';
+      quizContainer.style.display = 'none';
+      timeUpMessage.style.display = 'block';
+      timer.setAttribute('aria-label', 'Time is up');
+    }
+
+    function tick() {
+      remainingSeconds -= 1;
+      updateTimer();
+
+      if (remainingSeconds <= 0) {
+        endAttempt();
+      }
+    }
+
+    startButton.addEventListener('click', () => {
+      startButton.disabled = true;
+      startPanel.style.display = 'none';
+      quizContainer.style.display = 'block';
+      quizFile.src = encodeURI('BIOCHEM QUIZ.pdf');
+      updateTimer();
+      timerId = setInterval(tick, 1000);
+    });
+  </script>
+</body>
+</html>
